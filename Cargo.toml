@@ -1,0 +1,5 @@
+[package]
+
+name = "hll"
+version = "0.0.1"
+authors = ["kjgorman <kieran@kjgorman.com>"]
