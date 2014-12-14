@@ -2,11 +2,11 @@
 // use variable names from paper, namely registers M
 #![allow(non_snake_case)]
 
+extern crate "basic-hll" as hll;
+
 use std::num::Float;
 use std::io::BufferedReader;
 use std::io::File;
-
-extern crate hll;
 
 #[test]
 fn can_estimate_a_small_range_subset_of_the_system_dictionary () {

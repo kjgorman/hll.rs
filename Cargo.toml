@@ -1,5 +1,13 @@
-[package]
+[project]
 
-name = "hll"
-version = "0.0.1"
-authors = ["kjgorman <kieran@kjgorman.com>"]
+name        = "basic-hll"
+version     = "0.0.1"
+authors     = ["kjgorman <kieran@kjgorman.com>"]
+description = "The basic HyperLogLog algorithm"
+homepage    = "https://github.com/kjgorman/hll.rs"
+repository  = "https://github.com/kjgorman/hll.rs"
+license     = "MIT"
+
+[lib]
+name = "basic-hll"
+path = "src/hll.rs"

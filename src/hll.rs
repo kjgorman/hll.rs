@@ -1,3 +1,10 @@
+// Use actual greek variable names rather than latin (namely ρ vs. rho)
+#![feature(non_ascii_idents)]
+// use variable names from paper, namely registers M
+#![allow(non_snake_case)]
+#![crate_name = "basic-hll"]
+#![crate_type = "lib"]
+
 use std::cmp;
 use std::fmt;
 use std::num::Int;
