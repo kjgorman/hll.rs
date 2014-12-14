@@ -12,3 +12,6 @@ keywords    = ["hyperloglog", "hll"]
 [lib]
 name = "basic-hll"
 path = "src/lib.rs"
+
+[dependencies.algebra]
+algebra = "0.1.0"

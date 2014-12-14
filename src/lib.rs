@@ -5,13 +5,18 @@
 #![crate_name = "basic-hll"]
 #![crate_type = "lib"]
 
+extern crate algebra;
+
+/* -------------------- std libs ------------------- */
 use std::cmp;
 use std::fmt;
 use std::num::Int;
 use std::num::Float;
 use std::hash;
 use std::hash::Hash;
+/* ------------------------------------------------- */
 
+/* -------------------- helpers -------------------- */
 fn get_hash<Sized? T: Hash>(val: &T) -> u64 {
     hash::hash(val)
 }
@@ -36,6 +41,10 @@ fn leftmost_one_bit (v: u64) -> uint {
 
     64 - counter
 }
+
+/* ------------------------------------------------- */
+
+/* --------------- hyper log log ------------------- */
 
 pub struct HLL {
     alpha: f64,
@@ -115,8 +124,51 @@ impl HLL {
     }
 }
 
+/* ------------------------------------------------- */
+
+/* --------------- trait instances ----------------- */
+
 impl fmt::Show for HLL {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         write!(formatter, "α: {}, b: {}, m: {}", self.alpha, self.b, self.m)
     }
 }    
+
+impl std::cmp::Eq for HLL {}
+impl std::cmp::PartialEq for HLL {
+    fn eq(&self, other: &HLL) -> bool {
+           self.alpha == other.alpha
+        && self.m     == other.m
+        && self.b     == other.b
+        && self.M     == other.M
+    }
+}
+
+impl std::ops::Add<HLL, HLL> for HLL {
+    fn add(&self, other: &HLL) -> HLL {
+        HLL {
+            alpha: self.alpha,
+            b: self.b,
+            m: self.m,
+            M: self.M.clone()
+        }
+    }
+}
+
+impl algebra::structure::IdentityAdditive for HLL {
+    fn zero () -> HLL {
+        HLL {
+            alpha: 0.0,
+            m: 0,
+            b: 0,
+            M: Vec::new()
+        }
+    }
+}
+
+impl algebra::structure::SemigroupAdditive for HLL {}
+impl algebra::structure::SemigroupAdditiveApprox for HLL {}
+impl algebra::structure::MonoidAdditiveApprox for HLL {}
+impl algebra::structure::MonoidAdditive for HLL {}
+
+/* ------------------------------------------------- */
