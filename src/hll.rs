@@ -27,7 +27,7 @@ fn leftmost_one_bit (v: u64) -> uint {
         counter += 1;
     }
 
-    counter
+    64 - counter
 }
 
 pub struct HLL {
@@ -58,8 +58,10 @@ impl HLL {
 
     pub fn insert<Sized? T: Hash>(&mut self, val: &T) {
         let hash = get_hash(val);
-        let j = (hash & (self.b - 1) as u64) as uint;
-        let w = hash >> self.b;
+        // j is the first b many bits
+        let j = (hash >> (64 - self.b)) as uint;
+        // w is the remaining bits (i.e. b -> 64)
+        let w = hash & (Int::pow(2, 64 - self.b) - 1);
         let ρ = leftmost_one_bit(w) as u8;
 
         self.M[j] = cmp::max(self.M[j], ρ);
@@ -70,9 +72,9 @@ impl HLL {
     }
 
     fn raw_estimate(&self) -> f64 {
-        let sum: i64 = self.M.iter().fold (0, |p, &r| p + Int::pow(2, -1 * (r as uint)));
-        
-        self.alpha as f64 * Int::pow(self.m, 2) as f64 * (1.0 / sum as f64)
+        let sum: f64 = self.M.iter().fold (0.0, |p, &r| p + 2.0f64.powi(-(r as i32)));
+
+        self.alpha as f64 * Int::pow(self.m, 2) as f64 * (1.0 / sum)
     }
 
     fn empty_registers (&self) -> uint {
@@ -80,26 +82,29 @@ impl HLL {
     }
     
     fn range_correction(&self, e: f64) -> f64 {
-        let twoTo32: f64 = (1u << 32u) as f64;
+        let twoTo32: f64 = 2.0f64.powi(32) as f64;
 
+        println!("estimate: {}", e);
         // small range correction
         if e <= (5.0*(self.m as f64))/2.0 {
+            println!("small range correction");
             let v  = self.empty_registers() as f64;
             let fm = self.m as f64;
             
             return match v {
                 0.0 => e,
-                _   => fm * Float::log10(fm / v)
+                _   => fm * (fm / v).ln()
             }
         }
 
-        // medium range correction
-        if (30.0 * e) <= twoTo32 {
+        // medium range (no) correction
+        if e <= twoTo32/30.0 {
+            println!("no correction");
             return e;
         }
 
-        // TODO -- what's the base of this log?
-        -1.0 * twoTo32 * Float::log10(1.0 - e/twoTo32)
+        println!("large range correction");
+        -twoTo32 * (1.0 - e/twoTo32).ln()
     }
 }
 

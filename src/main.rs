@@ -7,11 +7,16 @@
 mod hll;
 
 fn main() {
-    let mut x = hll::HLL::one_hundred_twenty_eight();
+    let mut x = hll::HLL::ctor(0.0040625);
 
-    x.insert("foo");
-    x.insert("bar");
-    x.insert("quux");
+    let words = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+                 "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
+                 "u", "v", "q", "x", "y", "z"];
+
+    for &word in words.iter() {
+        x.insert(word);
+    }
+    
     println!("{}", x);
     println!("{}", x.count());
 }
