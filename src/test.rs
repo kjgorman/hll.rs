@@ -9,7 +9,7 @@ use std::io::File;
 mod hll;
 
 #[test]
-fn can_estimate_the_system_dictionary () {
+fn can_estimate_a_small_range_subset_of_the_system_dictionary () {
     let path = Path::new("/usr/share/dict/words");
     let mut file = BufferedReader::new(File::open(&path));
     let mut store = hll::HLL::ctor(0.0040625);
