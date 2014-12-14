@@ -7,8 +7,11 @@
 mod hll;
 
 fn main() {
-    let mut x = hll::HLL::ctor(0.13);
+    let mut x = hll::HLL::one_hundred_twenty_eight();
 
     x.insert("foo");
+    x.insert("bar");
+    x.insert("quux");
+    println!("{}", x);
     println!("{}", x.count());
 }

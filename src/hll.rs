@@ -38,17 +38,21 @@ pub struct HLL {
 }
 
 impl HLL {
+    pub fn one_hundred_twenty_eight () -> HLL {
+        HLL::ctor(0.09192)
+    }
+    
     pub fn ctor(error: f64) -> HLL {
-        assert!(error > 0.0 && error < 1.0)
-            // error = 1.04 / sqrt(m)
-            let m = Float::floor((1.04/error) * (1.04/error)) as uint;
+        assert!(error > 0.0 && error < 1.0);
+        // error = 1.04 / sqrt(m)
+        let m = Float::floor((1.04/error) * (1.04/error)) as uint;
         let b = Float::log2(m as f64) as uint;
         
         HLL {
             alpha: alpha(m),
             b: b,
             m: m,
-            M: Vec::from_elem(b, 0u8)
+            M: Vec::from_elem(m, 0u8)
         }
     }
 
@@ -101,6 +105,6 @@ impl HLL {
 
 impl fmt::Show for HLL {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "α: {}, b: {}, m: {}, M: {}", self.alpha, self.b, self.m, self.M)
+        write!(formatter, "α: {}, b: {}, m: {}", self.alpha, self.b, self.m)
     }
 }    
