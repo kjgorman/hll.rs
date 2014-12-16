@@ -10,10 +10,10 @@ extern crate algebra;
 /* -------------------- std libs ------------------- */
 use std::cmp;
 use std::fmt;
-use std::num::Int;
-use std::num::Float;
 use std::hash;
 use std::hash::Hash;
+use std::num::Int;
+use std::num::Float;
 /* ------------------------------------------------- */
 
 /* -------------------- helpers -------------------- */
@@ -100,10 +100,8 @@ impl HLL {
     fn range_correction(&self, e: f64) -> f64 {
         let twoTo32: f64 = 2.0f64.powi(32) as f64;
 
-        println!("estimate: {}", e);
         // small range correction
         if e <= (5.0*(self.m as f64))/2.0 {
-            println!("small range correction");
             let v  = self.empty_registers() as f64;
             let fm = self.m as f64;
             
@@ -115,12 +113,14 @@ impl HLL {
 
         // medium range (no) correction
         if e <= twoTo32/30.0 {
-            println!("no correction");
             return e;
         }
 
-        println!("large range correction");
         -twoTo32 * (1.0 - e/twoTo32).ln()
+    }
+
+    pub fn registers(&self) -> Vec<u8> {
+        self.M.clone()
     }
 }
 
@@ -144,13 +144,27 @@ impl std::cmp::PartialEq for HLL {
     }
 }
 
+fn mergeRegisters (first: &Vec<u8>, second: &Vec<u8>) -> Vec<u8> {
+    let mut res: Vec<u8> = Vec::new();
+    let mut zipper = first.iter().zip(second.iter());
+    loop {
+        match zipper.next() {
+            None => return res,
+            Some ((f, s)) => res.push(*cmp::max(f, s))
+        }
+    }
+}
+
 impl std::ops::Add<HLL, HLL> for HLL {
     fn add(&self, other: &HLL) -> HLL {
+        assert!(self.alpha == other.alpha);
+        assert!(self.b == other.b);
+        assert!(self.m == other.m);
         HLL {
             alpha: self.alpha,
             b: self.b,
             m: self.m,
-            M: self.M.clone()
+            M: mergeRegisters(&self.M, &other.M)
         }
     }
 }
