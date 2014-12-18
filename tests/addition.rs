@@ -3,8 +3,10 @@
 #![allow(non_snake_case)]
 
 extern crate "basic-hll" as hll;
+extern crate algebra;
 
 use std::num::Float;
+use algebra::structure::IdentityAdditive;
 
 #[test]
 fn adding_two_empty_hlls_results_in_an_empty_hll () {
@@ -56,4 +58,22 @@ fn add_together_two_hlls_doesnt_double_count_duplicate_elements () {
 
     let third = first + second;
     assert_eq!(third.count().round(), 5.0);
+}
+
+#[test]
+fn monoid_laws_should_hold_for_hll () {
+    let zero: hll::HLL = IdentityAdditive::zero();
+    let mut first  = hll::HLL::ctor(0.0040625);
+    let mut second = hll::HLL::ctor(0.0040625);
+    let mut third  = hll::HLL::ctor(0.0040625);
+    
+    first.insert("foo");
+    second.insert("bar");
+    third.insert("quux");
+
+    // left & right identity
+    assert!(zero + first == first);
+    assert!(first + zero == first);
+    //associativity
+    assert!((first + second) + third == first + (second + third));
 }

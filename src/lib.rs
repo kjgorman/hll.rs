@@ -50,7 +50,29 @@ pub struct HLL {
     alpha: f64,
     b: uint,
     m: uint,
-    M: Vec<u8>
+    M: Vec<u8>,
+    // [!] this is pretty much a hack until I can think of something
+    //     better to do for the monoid instance. Basically we need the
+    //     zero value to always satisfy the left and right identity laws
+    //     but because you need to have the number of registers be
+    //     equivalent to do addition, it implies you need a distinct
+    //     monoid instance per HLL configuration (i.e. an HLL of 4
+    //     registers has a distinct zero from a HLL of 16).
+    //
+    //     Because I can't really do dependent types in rust, we instead
+    //     have a distinguished zero element, that is allowed to bypass
+    //     the assertions on the equivalent sizes...
+    //
+    //     For reference, Ed Kmett's haskell implementation actually does
+    //     use higher kinded types and some tricky reflection to make the
+    //     monoid instance be parameterised by a config type that is itself
+    //     typed to a Peano natural encoded type. Twitter's algebird instance
+    //     declares a separate class that encapsulates the notion of
+    //     a "HyperLogLogMonoid" instance, and instances of that class are
+    //     instantiated with the register size (i.e. the 'instance' for monoid
+    //     is just an 'instance' of the class, for two interpretations of
+    //     'instance').
+    isZero: bool
 }
 
 impl HLL {
@@ -68,7 +90,8 @@ impl HLL {
             alpha: alpha(m),
             b: b,
             m: m,
-            M: Vec::from_elem(m, 0u8)
+            M: Vec::from_elem(m, 0u8),
+            isZero: false
         }
     }
 
@@ -122,6 +145,16 @@ impl HLL {
     pub fn registers(&self) -> Vec<u8> {
         self.M.clone()
     }
+
+    fn clone (&self) -> HLL {
+        HLL {
+            alpha: self.alpha,
+            b: self.b,
+            m: self.m,
+            M: self.M.clone(),
+            isZero: self.isZero
+        }
+    }
 }
 
 /* ------------------------------------------------- */
@@ -137,14 +170,16 @@ impl fmt::Show for HLL {
 impl std::cmp::Eq for HLL {}
 impl std::cmp::PartialEq for HLL {
     fn eq(&self, other: &HLL) -> bool {
-           self.alpha == other.alpha
-        && self.m     == other.m
-        && self.b     == other.b
-        && self.M     == other.M
+           self.alpha  == other.alpha
+        && self.m      == other.m
+        && self.b      == other.b
+        && self.M      == other.M
+        && self.isZero == other.isZero   
     }
 }
 
 fn mergeRegisters (first: &Vec<u8>, second: &Vec<u8>) -> Vec<u8> {
+    // TODO -- isn't this just zipWith max?
     let mut res: Vec<u8> = Vec::new();
     let mut zipper = first.iter().zip(second.iter());
     loop {
@@ -157,14 +192,20 @@ fn mergeRegisters (first: &Vec<u8>, second: &Vec<u8>) -> Vec<u8> {
 
 impl std::ops::Add<HLL, HLL> for HLL {
     fn add(&self, other: &HLL) -> HLL {
+        // [!] gross...
+        if self.isZero { return other.clone(); }
+        if other.isZero { return self.clone(); }
+        
         assert!(self.alpha == other.alpha);
         assert!(self.b == other.b);
         assert!(self.m == other.m);
+
         HLL {
             alpha: self.alpha,
             b: self.b,
             m: self.m,
-            M: mergeRegisters(&self.M, &other.M)
+            M: mergeRegisters(&self.M, &other.M),
+            isZero: false
         }
     }
 }
@@ -175,14 +216,15 @@ impl algebra::structure::IdentityAdditive for HLL {
             alpha: 0.0,
             m: 0,
             b: 0,
-            M: Vec::new()
+            M: Vec::new(),
+            isZero: true
         }
     }
 }
 
-impl algebra::structure::SemigroupAdditive for HLL {}
+impl algebra::structure::MonoidAdditive          for HLL {}
+impl algebra::structure::SemigroupAdditive       for HLL {}
+impl algebra::structure::MonoidAdditiveApprox    for HLL {}
 impl algebra::structure::SemigroupAdditiveApprox for HLL {}
-impl algebra::structure::MonoidAdditiveApprox for HLL {}
-impl algebra::structure::MonoidAdditive for HLL {}
 
 /* ------------------------------------------------- */
