@@ -1,7 +1,3 @@
-#![feature(non_ascii_idents)]
-// use variable names from paper, namely registers M
-#![allow(non_snake_case)]
-
 extern crate "basic-hll" as hll;
 
 #[cfg(test)]
@@ -61,15 +57,15 @@ mod tests {
         third.insert(&"quux");
 
         // left & right identity
-        let leftZero  = first.clone() + zero.clone();
-        let rightZero = zero.clone() + first.clone();
+        let left_zero  = first.clone() + zero.clone();
+        let right_zero = zero.clone() + first.clone();
 
-        assert_eq!(leftZero, first);
-        assert_eq!(rightZero, first);
+        assert_eq!(left_zero, first);
+        assert_eq!(right_zero, first);
         // associativity
-        let leftAssociate = (first.clone() + second.clone()) + third.clone();
-        let rightAssociate = first.clone() + (second.clone() + third.clone());
+        let left_associate = (first.clone() + second.clone()) + third.clone();
+        let right_associate = first.clone() + (second.clone() + third.clone());
 
-        assert_eq!(leftAssociate, rightAssociate);
+        assert_eq!(left_associate, right_associate);
     }
 }

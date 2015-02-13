@@ -1,6 +1,3 @@
-#![feature(non_ascii_idents)]
-// use variable names from paper, namely registers M
-#![allow(non_snake_case)]
 #![feature(test)]
 
 extern crate "basic-hll" as hll;

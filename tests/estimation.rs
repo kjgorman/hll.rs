@@ -1,11 +1,8 @@
-#![feature(non_ascii_idents)]
 // these are all unstable...
 #![feature(io)]
 #![feature(fs)]
 #![feature(path)]
 #![feature(core)]
-// use variable names from paper, namely registers M
-#![allow(non_snake_case)]
 
 extern crate "basic-hll" as hll;
 
