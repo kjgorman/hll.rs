@@ -9,55 +9,60 @@
 
 extern crate "basic-hll" as hll;
 
-use std::num::Int;
-use std::num::Float;
-use std::io::BufReader;
-use std::io::BufReadExt;
-use std::fs::File;
+#[cfg(test)]
+mod tests {
 
-#[test]
-fn can_estimate_a_small_range_subset_of_the_system_dictionary () {
-    let path = Path::new("/usr/share/dict/words");
-    let file = BufReader::new(File::open(&path).unwrap());
-    let mut store = hll::HLL::ctor(0.0040625);
-    let mut count = 0f64;
-    let actual = 60000.0f64;
+    use std::num::{ Int, Float };
+    use std::io::{ BufReader, BufReadExt };
+    use std::fs::File;
 
-    for line in file.lines() {
-        count += 1.0;
-        if count > actual {
-            break;
+    use hll::*;
+
+    #[test]
+    fn can_estimate_a_small_range_subset_of_the_system_dictionary () {
+        let path = Path::new("/usr/share/dict/words");
+        let file = BufReader::new(File::open(&path).unwrap());
+        let mut store = HLL::ctor(0.0040625);
+        let mut count = 0f64;
+        let actual = 60000.0f64;
+
+        for line in file.lines() {
+            count += 1.0;
+            if count > actual {
+                break;
+            }
+            store.insert(&line.unwrap());
         }
-        store.insert(&line.unwrap());
-    }
 
-    let count = store.count();
-    let error = 1.04 / 65536.0f64.sqrt();
+        let count = store.count();
+        let error = 1.04 / 65536.0f64.sqrt();
 
-    if  (1.0 - (count / actual)) > error {
-        panic!("expected {} to be within {} of {} (but was {})", count, error, actual, 1.0 - (count / actual));
-    }
-}
-
-#[test]
-fn can_estimate_a_large_sequence_of_floating_points () {
-    let limit = 2i64.pow(20);
-    let mut store = hll::HLL::ctor(0.0040625);
-    let mut counter = 0i64;
-
-    loop {
-        store.insert(&counter);
-        counter += 1;
-        if counter > limit {
-            break;
+        if  (1.0 - (count / actual)) > error {
+            panic!("expected {} to be within {} of {} (but was {})", count, error, actual, 1.0 - (count / actual));
         }
     }
 
-    let count = store.count();
-    let error = 1.04 / 65536.0f64.sqrt();
+    #[test]
+    fn can_estimate_a_large_sequence_of_floating_points () {
+        let limit = 2i64.pow(20);
+        let mut store = HLL::ctor(0.0040625);
+        let mut counter = 0i64;
 
-    if (1.0 - (count / limit as f64)).abs() > error {
-        panic!("expected {} to be within {} of {} (but was {})"
-               , count, error, limit, 1.0 - (count / limit as f64).abs());
+        loop {
+            store.insert(&counter);
+            counter += 1;
+            if counter > limit {
+                break;
+            }
+        }
+
+        let count = store.count();
+        let error = 1.04 / 65536.0f64.sqrt();
+
+        if (1.0 - (count / limit as f64)).abs() > error {
+            panic!("expected {} to be within {} of {} (but was {})"
+                   , count, error, limit, 1.0 - (count / limit as f64).abs());
+        }
     }
+
 }
