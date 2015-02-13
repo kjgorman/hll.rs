@@ -1,5 +1,7 @@
 ### hll
 
+![](https://travis-ci.org/kjgorman/hll.rs.svg?branch=master)
+
 It's the hyperloglog cardinality estimation algorithm implemented in rust.
 
 Specifically, it's the algorithm as presented on page 140 of the
