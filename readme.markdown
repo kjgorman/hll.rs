@@ -33,8 +33,8 @@ log.insert(&"bar");
 // you can count the approximate number of elements
 println!("I think there are {} elements", log.count());
 
-// It implements the monoid trait from the algebra crate, so
-// you can also add HLLs together.
+// It implements Add so you can combine HLLs in a way the follows
+// the monoid laws.
 
 let first  = hll::HLL::ctor(0.26);
 let second = hll::HLL::ctor(0.26);
