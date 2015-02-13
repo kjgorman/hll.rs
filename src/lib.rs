@@ -1,27 +1,25 @@
 // Use actual greek variable names rather than latin (namely ρ vs. rho)
 #![feature(non_ascii_idents)]
+// redesign
+#![feature(hash)]
+// pending
+#![feature(core)]
 // use variable names from paper, namely registers M
 #![allow(non_snake_case)]
 #![crate_name = "basic-hll"]
 #![crate_type = "lib"]
 
-extern crate algebra;
-
 /* -------------------- std libs ------------------- */
 use std::cmp;
 use std::fmt;
-use std::hash;
-use std::hash::Hash;
-use std::num::Int;
-use std::num::Float;
+use std::hash::{ hash, Hash, SipHasher };
+use std::iter;
+use std::num::{ Int, Float };
 /* ------------------------------------------------- */
 
 /* -------------------- helpers -------------------- */
-fn get_hash<Sized? T: Hash>(val: &T) -> u64 {
-    hash::hash(val)
-}
 
-fn alpha (m: uint) -> f64 {
+fn alpha (m: usize) -> f64 {
     match m {
         16 => 0.673,
         32 => 0.697,
@@ -30,8 +28,8 @@ fn alpha (m: uint) -> f64 {
     }
 }
 
-fn leftmost_one_bit (v: u64) -> uint {
-    let mut counter: uint = 0;
+fn leftmost_one_bit (v: u64) -> usize {
+    let mut counter: usize = 0;
     let mut shiftable = v;
 
     while shiftable > 0 {
@@ -48,8 +46,8 @@ fn leftmost_one_bit (v: u64) -> uint {
 
 pub struct HLL {
     alpha: f64,
-    b: uint,
-    m: uint,
+    b: usize,
+    m: usize,
     M: Vec<u8>,
     // [!] this is pretty much a hack until I can think of something
     //     better to do for the monoid instance. Basically we need the
@@ -79,26 +77,27 @@ impl HLL {
     pub fn one_hundred_twenty_eight () -> HLL {
         HLL::ctor(0.09192)
     }
-    
+
     pub fn ctor(error: f64) -> HLL {
         assert!(error > 0.0 && error < 1.0);
         // error = 1.04 / sqrt(m)
-        let m = Float::floor((1.04/error) * (1.04/error)) as uint;
-        let b = Float::log2(m as f64) as uint;
-        
+        let m = Float::floor((1.04/error) * (1.04/error)) as usize;
+        let b = Float::log2(m as f64) as usize;
+
         HLL {
             alpha: alpha(m),
             b: b,
             m: m,
-            M: Vec::from_elem(m, 0u8),
+            M: iter::repeat(0u8).take(m).collect(),
             isZero: false
         }
     }
 
-    pub fn insert<Sized? T: Hash>(&mut self, val: &T) {
-        let hash = get_hash(val);
+    pub fn insert<T: Hash<SipHasher>>(&mut self, val: &T) {
+        let hash = hash::<T, SipHasher>(val);
+
         // j is the first b many bits
-        let j = (hash >> (64 - self.b)) as uint;
+        let j = (hash >> (64 - self.b)) as usize;
         // w is the remaining bits (i.e. b -> 64)
         let w = hash & (Int::pow(2, 64 - self.b) - 1);
         let ρ = leftmost_one_bit(w) as u8;
@@ -116,10 +115,10 @@ impl HLL {
         self.alpha as f64 * Int::pow(self.m, 2) as f64 * (1.0 / sum)
     }
 
-    fn empty_registers (&self) -> uint {
+    fn empty_registers (&self) -> usize {
         self.M.iter().filter(|&r| *r == 0).count()
     }
-    
+
     fn range_correction(&self, e: f64) -> f64 {
         let twoTo32: f64 = 2.0f64.powi(32) as f64;
 
@@ -127,7 +126,7 @@ impl HLL {
         if e <= (5.0*(self.m as f64))/2.0 {
             let v  = self.empty_registers() as f64;
             let fm = self.m as f64;
-            
+
             return match v {
                 0.0 => e,
                 _   => fm * (fm / v).ln()
@@ -146,7 +145,7 @@ impl HLL {
         self.M.clone()
     }
 
-    fn clone (&self) -> HLL {
+    pub fn clone (&self) -> HLL {
         HLL {
             alpha: self.alpha,
             b: self.b,
@@ -155,17 +154,34 @@ impl HLL {
             isZero: self.isZero
         }
     }
+
+    pub fn empty () -> HLL {
+        HLL {
+            alpha: 0.0,
+            m: 0,
+            b: 0,
+            M: Vec::new(),
+            isZero: true
+        }
+    }
+
 }
 
 /* ------------------------------------------------- */
 
 /* --------------- trait instances ----------------- */
 
-impl fmt::Show for HLL {
+impl std::fmt::Display for HLL {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         write!(formatter, "α: {}, b: {}, m: {}", self.alpha, self.b, self.m)
     }
-}    
+}
+
+impl std::fmt::Debug for HLL {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        write!(formatter, "α: {}, b: {}, m: {}", self.alpha, self.b, self.m)
+    }
+}
 
 impl std::cmp::Eq for HLL {}
 impl std::cmp::PartialEq for HLL {
@@ -174,7 +190,7 @@ impl std::cmp::PartialEq for HLL {
         && self.m      == other.m
         && self.b      == other.b
         && self.M      == other.M
-        && self.isZero == other.isZero   
+        && self.isZero == other.isZero
     }
 }
 
@@ -190,12 +206,14 @@ fn mergeRegisters (first: &Vec<u8>, second: &Vec<u8>) -> Vec<u8> {
     }
 }
 
-impl std::ops::Add<HLL, HLL> for HLL {
-    fn add(&self, other: &HLL) -> HLL {
+impl std::ops::Add<HLL> for HLL {
+    type Output = HLL;
+
+    fn add(self, other: HLL) -> HLL {
         // [!] gross...
         if self.isZero { return other.clone(); }
         if other.isZero { return self.clone(); }
-        
+
         assert!(self.alpha == other.alpha);
         assert!(self.b == other.b);
         assert!(self.m == other.m);
@@ -210,21 +228,26 @@ impl std::ops::Add<HLL, HLL> for HLL {
     }
 }
 
-impl algebra::structure::IdentityAdditive for HLL {
-    fn zero () -> HLL {
+impl<'a> std::ops::Add<&'a HLL> for  HLL {
+    type Output = HLL;
+
+    fn add(self, other: &HLL) -> HLL {
+        // [!] gross...
+        if self.isZero { return other.clone(); }
+        if other.isZero { return self.clone(); }
+
+        assert!(self.alpha == other.alpha);
+        assert!(self.b == other.b);
+        assert!(self.m == other.m);
+
         HLL {
-            alpha: 0.0,
-            m: 0,
-            b: 0,
-            M: Vec::new(),
-            isZero: true
+            alpha: self.alpha,
+            b: self.b,
+            m: self.m,
+            M: mergeRegisters(&self.M, &other.M),
+            isZero: false
         }
     }
 }
-
-impl algebra::structure::MonoidAdditive          for HLL {}
-impl algebra::structure::SemigroupAdditive       for HLL {}
-impl algebra::structure::MonoidAdditiveApprox    for HLL {}
-impl algebra::structure::SemigroupAdditiveApprox for HLL {}
 
 /* ------------------------------------------------- */

@@ -3,10 +3,8 @@
 #![allow(non_snake_case)]
 
 extern crate "basic-hll" as hll;
-extern crate algebra;
 
 use std::num::Float;
-use algebra::structure::IdentityAdditive;
 
 #[test]
 fn adding_two_empty_hlls_results_in_an_empty_hll () {
@@ -17,26 +15,14 @@ fn adding_two_empty_hlls_results_in_an_empty_hll () {
     assert_eq!(third.registers().iter().filter(|&r| *r != 0).count(), 0);
 }
 
-#[test]
-fn adding_together_two_hlls_takes_the_max_in_each_register () {
-    let mut first  = hll::HLL::ctor(0.26);
-    let mut second = hll::HLL::ctor(0.26);
-
-    first.insert("foo");  // sets register 14 to 7
-    second.insert("bar"); // sets register 6 to 5
-
-    let third = first + second;
-    assert_eq!(third.registers()[14], 7);
-    assert_eq!(third.registers()[6], 5);
-}
 
 #[test]
 fn adding_together_two_hlls_preserves_the_sum_of_their_counts () {
     let mut first  = hll::HLL::ctor(0.0040625);
     let mut second = hll::HLL::ctor(0.0040625);
 
-    first.insert("a"); first.insert("b"); first.insert("c");
-    second.insert("d"); second.insert("e"); second.insert("f");
+    first.insert(&"a"); first.insert(&"b"); first.insert(&"c");
+    second.insert(&"d"); second.insert(&"e"); second.insert(&"f");
 
     assert_eq!(first.count().round(), 3.0);
     assert_eq!(second.count().round(), 3.0);
@@ -50,8 +36,8 @@ fn add_together_two_hlls_doesnt_double_count_duplicate_elements () {
     let mut first  = hll::HLL::ctor(0.0040625);
     let mut second = hll::HLL::ctor(0.0040625);
 
-    first.insert("a"); first.insert("b"); first.insert("c");
-    second.insert("a"); second.insert("d"); second.insert("e");
+    first.insert(&"a"); first.insert(&"b"); first.insert(&"c");
+    second.insert(&"a"); second.insert(&"d"); second.insert(&"e");
 
     assert_eq!(first.count().round(), 3.0);
     assert_eq!(second.count().round(), 3.0);
@@ -62,18 +48,24 @@ fn add_together_two_hlls_doesnt_double_count_duplicate_elements () {
 
 #[test]
 fn monoid_laws_should_hold_for_hll () {
-    let zero: hll::HLL = IdentityAdditive::zero();
+    let zero = hll::HLL::empty();
     let mut first  = hll::HLL::ctor(0.0040625);
     let mut second = hll::HLL::ctor(0.0040625);
     let mut third  = hll::HLL::ctor(0.0040625);
-    
-    first.insert("foo");
-    second.insert("bar");
-    third.insert("quux");
+
+    first.insert(&"foo");
+    second.insert(&"bar");
+    third.insert(&"quux");
 
     // left & right identity
-    assert!(zero + first == first);
-    assert!(first + zero == first);
-    //associativity
-    assert!((first + second) + third == first + (second + third));
+    let leftZero  = first.clone() + zero.clone();
+    let rightZero = zero.clone() + first.clone();
+
+    assert_eq!(leftZero, first);
+    assert_eq!(rightZero, first);
+    // associativity
+    let leftAssociate = (first.clone() + second.clone()) + third.clone();
+    let rightAssociate = first.clone() + (second.clone() + third.clone());
+
+    assert_eq!(leftAssociate, rightAssociate);
 }
