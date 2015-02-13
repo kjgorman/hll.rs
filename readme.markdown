@@ -24,9 +24,9 @@ extern crate "basic-hll" as hll;
 // -- which gives 2^12 size to it's underlying Vec (i.e. 4kb).
 let mut log = hll::HLL::ctor(0.01625);
 
-// you can insert anything implementing the std::hash::Hash trait
-log.insert("foo");
-log.insert(&Vec.from_elem(10, 1u8));
+// you can insert anything that can be hashed
+log.insert(&"foo");
+log.insert(&"bar");
 
 // you can count the approximate number of elements
 println!("I think there are {} elements", log.count());
@@ -36,5 +36,5 @@ println!("I think there are {} elements", log.count());
 
 let first  = hll::HLL::ctor(0.26);
 let second = hll::HLL::ctor(0.26);
-let third  = first + second;
+let third  = first.clone() + second.clone();
 ```
