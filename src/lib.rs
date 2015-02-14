@@ -6,6 +6,7 @@
 #![feature(core)]
 // use variable names from paper, namely registers M
 #![allow(non_snake_case)]
+
 #![crate_name = "basic-hll"]
 #![crate_type = "lib"]
 
