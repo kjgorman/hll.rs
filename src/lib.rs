@@ -94,7 +94,7 @@ impl HLL {
         }
     }
 
-    pub fn insert<T: Hash<SipHasher>>(&mut self, val: &T) {
+    pub fn insert<T: Hash>(&mut self, val: &T) {
         let hash = hash::<T, SipHasher>(val);
 
         // j is the first b many bits
