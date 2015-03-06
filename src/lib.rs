@@ -47,7 +47,7 @@ fn leftmost_one_bit (v: u64) -> usize {
 
 pub struct HLL {
     alpha: f64,
-    b: usize,
+    b: u32,
     m: usize,
     M: Vec<u8>,
     // [!] this is pretty much a hack until I can think of something
@@ -83,7 +83,7 @@ impl HLL {
         assert!(error > 0.0 && error < 1.0);
         // error = 1.04 / sqrt(m)
         let m = Float::floor((1.04/error) * (1.04/error)) as usize;
-        let b = Float::log2(m as f64) as usize;
+        let b = Float::log2(m as f64) as u32;
 
         HLL {
             alpha: alpha(m),
@@ -100,7 +100,7 @@ impl HLL {
         // j is the first b many bits
         let j = (hash >> (64 - self.b)) as usize;
         // w is the remaining bits (i.e. b -> 64)
-        let w = hash & (Int::pow(2, 64 - self.b) - 1);
+        let w = hash & (Int::pow(2, 64u32 - self.b) - 1);
         let ρ = leftmost_one_bit(w) as u8;
 
         self.M[j] = cmp::max(self.M[j], ρ);
