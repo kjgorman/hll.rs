@@ -1,7 +1,7 @@
 // these are all unstable...
 #![feature(io)]
 #![feature(fs)]
-#![feature(old_path)]
+#![feature(path)]
 #![feature(core)]
 
 extern crate "basic-hll" as hll;
@@ -12,6 +12,7 @@ mod tests {
     use std::num::{ Int, Float };
     use std::io::{ BufReader, BufReadExt };
     use std::fs::File;
+    use std::path::Path;
 
     use hll::*;
 
