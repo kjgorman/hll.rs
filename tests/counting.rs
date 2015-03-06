@@ -7,7 +7,7 @@ mod tests {
 
     #[test]
     fn a_hll_can_count_small_numbers () {
-        let mut hll = HLL::ctor(0.0040625);
+        let mut hll = HLL::new(0.0040625);
 
         hll.insert(&1);
         hll.insert(&2);
@@ -18,7 +18,7 @@ mod tests {
 
     #[test]
     fn a_hll_can_count_heterogenuous_items () {
-        let mut hll = HLL::ctor(0.0040625);
+        let mut hll = HLL::new(0.0040625);
 
         hll.insert(&1);
         hll.insert(&"foo");

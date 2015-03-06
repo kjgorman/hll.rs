@@ -76,10 +76,10 @@ pub struct HLL {
 
 impl HLL {
     pub fn one_hundred_twenty_eight () -> HLL {
-        HLL::ctor(0.09192)
+        HLL::new(0.09192)
     }
 
-    pub fn ctor(error: f64) -> HLL {
+    pub fn new(error: f64) -> HLL {
         assert!(error > 0.0 && error < 1.0);
         // error = 1.04 / sqrt(m)
         let m = Float::floor((1.04/error) * (1.04/error)) as usize;
@@ -92,6 +92,10 @@ impl HLL {
             M: iter::repeat(0u8).take(m).collect(),
             isZero: false
         }
+    }
+
+    pub fn ctor(error: f64) -> HLL {
+        HLL::new(error)
     }
 
     pub fn insert<T: Hash>(&mut self, val: &T) {
