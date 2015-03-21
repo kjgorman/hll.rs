@@ -1,7 +1,4 @@
 // these are all unstable...
-#![feature(io)]
-#![feature(fs)]
-#![feature(path)]
 #![feature(core)]
 
 extern crate "basic-hll" as hll;
@@ -10,7 +7,7 @@ extern crate "basic-hll" as hll;
 mod tests {
 
     use std::num::{ Int, Float };
-    use std::io::{ BufReader, BufReadExt };
+    use std::io::{ BufRead, BufReader };
     use std::fs::File;
     use std::path::Path;
 
