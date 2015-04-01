@@ -7,7 +7,7 @@
 // use variable names from paper, namely registers M
 #![allow(non_snake_case)]
 
-#![crate_name = "basic-hll"]
+#![crate_name = "basichll"]
 #![crate_type = "lib"]
 
 /* -------------------- std libs ------------------- */

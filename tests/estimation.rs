@@ -1,7 +1,7 @@
 // these are all unstable...
 #![feature(core)]
 
-extern crate "basic-hll" as hll;
+extern crate basichll as hll;
 
 #[cfg(test)]
 mod tests {

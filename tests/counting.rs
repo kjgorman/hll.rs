@@ -1,4 +1,4 @@
-extern crate "basic-hll" as hll;
+extern crate basichll as hll;
 
 #[cfg(test)]
 mod tests {

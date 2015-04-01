@@ -1,7 +1,7 @@
 [project]
 
-name        = "basic-hll"
-version     = "0.0.6"
+name        = "basichll"
+version     = "0.1.6"
 authors     = ["kjgorman <kieran@kjgorman.com>"]
 description = "The basic HyperLogLog algorithm"
 homepage    = "https://github.com/kjgorman/hll.rs"
@@ -10,5 +10,5 @@ license     = "MIT"
 keywords    = ["hyperloglog", "hll"]
 
 [lib]
-name = "basic-hll"
+name = "basichll"
 path = "src/lib.rs"
