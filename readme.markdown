@@ -24,7 +24,7 @@ extern crate basichll as hll;
 // error, which dictates the size of the HLL instance. The error
 // is 1.04 / sqrt(2 ^ bits), so for a 1% error you want about 12 bits
 // -- which gives 2^12 size to it's underlying Vec (i.e. 4kb).
-let mut log = hll::HLL::ctor(0.01625);
+let mut log = hll::HLL::new(0.01625);
 
 // you can insert anything that can be hashed
 log.insert(&"foo");
@@ -36,7 +36,7 @@ println!("I think there are {} elements", log.count());
 // It implements Add so you can combine HLLs in a way the follows
 // the monoid laws.
 
-let first  = hll::HLL::ctor(0.26);
-let second = hll::HLL::ctor(0.26);
+let first  = hll::HLL::new(0.26);
+let second = hll::HLL::new(0.26);
 let third  = first.clone() + second.clone();
 ```

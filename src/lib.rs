@@ -88,10 +88,6 @@ impl HLL {
         }
     }
 
-    pub fn ctor(error: f64) -> HLL {
-        HLL::new(error)
-    }
-
     pub fn insert<T: Hash>(&mut self, val: &T) {
         let mut hasher = SipHasher::new();
         val.hash(&mut hasher);
