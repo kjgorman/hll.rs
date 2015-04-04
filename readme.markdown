@@ -18,7 +18,7 @@ See the tests for some examples of usage, but broadly we can use it as
 follows:
 
 ```rust
-extern crate "basic-hll" as hll;
+extern crate basichll as hll;
 ...
 // Note the constructor parameter is the desired typical relative
 // error, which dictates the size of the HLL instance. The error
