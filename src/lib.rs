@@ -1,9 +1,3 @@
-// Use actual greek variable names rather than latin (namely ρ vs. rho)
-#![feature(non_ascii_idents)]
-// redesign
-#![feature(hash)]
-// pending
-#![feature(core)]
 // use variable names from paper, namely registers M
 #![allow(non_snake_case)]
 
@@ -13,7 +7,7 @@
 /* -------------------- std libs ------------------- */
 use std::cmp;
 use std::fmt;
-use std::hash::{ hash, Hash, SipHasher };
+use std::hash::{ Hash, Hasher, SipHasher };
 use std::iter;
 use std::num::{ Int, Float };
 /* ------------------------------------------------- */
@@ -99,15 +93,17 @@ impl HLL {
     }
 
     pub fn insert<T: Hash>(&mut self, val: &T) {
-        let hash = hash::<T, SipHasher>(val);
+        let mut hasher = SipHasher::new();
+        val.hash(&mut hasher);
+        let hash = hasher.finish();
 
         // j is the first b many bits
         let j = (hash >> (64 - self.b)) as usize;
         // w is the remaining bits (i.e. b -> 64)
-        let w = hash & (Int::pow(2, 64u32 - self.b) - 1);
-        let ρ = leftmost_one_bit(w) as u8;
+        let w = hash & (2u64.pow(64 - self.b) - 1) as u64;
+        let rho = leftmost_one_bit(w) as u8;
 
-        self.M[j] = cmp::max(self.M[j], ρ);
+        self.M[j] = cmp::max(self.M[j], rho);
     }
 
     pub fn count(&self) -> f64 {
@@ -117,7 +113,7 @@ impl HLL {
     fn raw_estimate(&self) -> f64 {
         let sum: f64 = self.M.iter().fold (0.0, |p, &r| p + 2.0f64.powi(-(r as i32)));
 
-        self.alpha as f64 * Int::pow(self.m, 2) as f64 * (1.0 / sum)
+        self.alpha as f64 * ((self.m  * self.m) as f64) * (1.0 / sum)
     }
 
     fn empty_registers (&self) -> usize {

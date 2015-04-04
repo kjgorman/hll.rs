@@ -2,7 +2,6 @@ extern crate basichll as hll;
 
 #[cfg(test)]
 mod tests {
-    use std::num::Float;
     use hll::*;
 
     #[test]

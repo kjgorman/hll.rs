@@ -1,6 +1,3 @@
-// these are all unstable...
-#![feature(core)]
-
 extern crate basichll as hll;
 
 #[cfg(test)]
