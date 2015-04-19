@@ -8,7 +8,7 @@
 use std::cmp;
 use std::fmt;
 use std::hash::{ Hash, Hasher, SipHasher };
-use std::iter;
+use std::iter::{ repeat, Iterator };
 use std::num::{ Int, Float };
 /* ------------------------------------------------- */
 
@@ -83,7 +83,7 @@ impl HLL {
             alpha: alpha(m),
             b: b,
             m: m,
-            M: iter::repeat(0u8).take(m).collect(),
+            M: repeat(0u8).take(m).collect(),
             isZero: false
         }
     }
@@ -191,16 +191,13 @@ impl std::cmp::PartialEq for HLL {
     }
 }
 
+fn zipWith<R, U: Iterator, C: Fn(U::Item, U::Item) -> R> (combo: C, left: U, right: U)
+   -> Vec<R> {
+    left.zip(right).map(| (l, r) | combo(l, r)).collect()
+}
+
 fn mergeRegisters (first: &Vec<u8>, second: &Vec<u8>) -> Vec<u8> {
-    // TODO -- isn't this just zipWith max?
-    let mut res: Vec<u8> = Vec::new();
-    let mut zipper = first.iter().zip(second.iter());
-    loop {
-        match zipper.next() {
-            None => return res,
-            Some ((f, s)) => res.push(*cmp::max(f, s))
-        }
-    }
+    zipWith(|&l, &r| std::cmp::max(l, r), first.iter(), second.iter())
 }
 
 impl<'a> std::ops::Add<&'a HLL> for &'a HLL {
