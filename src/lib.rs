@@ -203,32 +203,10 @@ fn mergeRegisters (first: &Vec<u8>, second: &Vec<u8>) -> Vec<u8> {
     }
 }
 
-impl std::ops::Add<HLL> for HLL {
+impl<'a> std::ops::Add<&'a HLL> for &'a HLL {
     type Output = HLL;
 
-    fn add(self, other: HLL) -> HLL {
-        // [!] gross...
-        if self.isZero { return other.clone(); }
-        if other.isZero { return self.clone(); }
-
-        assert!(self.alpha == other.alpha);
-        assert!(self.b == other.b);
-        assert!(self.m == other.m);
-
-        HLL {
-            alpha: self.alpha,
-            b: self.b,
-            m: self.m,
-            M: mergeRegisters(&self.M, &other.M),
-            isZero: false
-        }
-    }
-}
-
-impl<'a> std::ops::Add<&'a HLL> for  HLL {
-    type Output = HLL;
-
-    fn add(self, other: &HLL) -> HLL {
+    fn add(self, other: &'a HLL) -> HLL {
         // [!] gross...
         if self.isZero { return other.clone(); }
         if other.isZero { return self.clone(); }

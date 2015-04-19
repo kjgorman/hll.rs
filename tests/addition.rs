@@ -8,7 +8,7 @@ mod tests {
     fn adding_two_empty_hlls_results_in_an_empty_hll () {
         let first  = HLL::new(0.26);
         let second = HLL::new(0.26);
-        let third  = first + second;
+        let third  = &first + &second;
 
         assert_eq!(third.registers().iter().filter(|&r| *r != 0).count(), 0);
     }
@@ -25,7 +25,7 @@ mod tests {
         assert_eq!(first.count().round(), 3.0);
         assert_eq!(second.count().round(), 3.0);
 
-        let third = first + second;
+        let third = &first + &second;
         assert_eq!(third.count().round(), 6.0);
     }
 
@@ -40,7 +40,7 @@ mod tests {
         assert_eq!(first.count().round(), 3.0);
         assert_eq!(second.count().round(), 3.0);
 
-        let third = first + second;
+        let third = &first + &second;
         assert_eq!(third.count().round(), 5.0);
     }
 
@@ -56,14 +56,14 @@ mod tests {
         third.insert(&"quux");
 
         // left & right identity
-        let left_zero  = first.clone() + zero.clone();
-        let right_zero = zero.clone() + first.clone();
+        let left_zero  = &first + &zero;
+        let right_zero = &zero + &first;
 
         assert_eq!(left_zero, first);
         assert_eq!(right_zero, first);
         // associativity
-        let left_associate = (first.clone() + second.clone()) + third.clone();
-        let right_associate = first.clone() + (second.clone() + third.clone());
+        let left_associate = &(&first + &second) + &third;
+        let right_associate = &first + &(&second + &third);
 
         assert_eq!(left_associate, right_associate);
     }
