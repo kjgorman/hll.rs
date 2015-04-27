@@ -3,7 +3,6 @@ extern crate basichll as hll;
 #[cfg(test)]
 mod tests {
 
-    use std::num::{ Int, Float };
     use std::io::{ BufRead, BufReader };
     use std::fs::File;
     use std::path::Path;

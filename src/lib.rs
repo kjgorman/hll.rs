@@ -9,7 +9,6 @@ use std::cmp;
 use std::fmt;
 use std::hash::{ Hash, Hasher, SipHasher };
 use std::iter::{ repeat, Iterator };
-use std::num::{ Int, Float };
 /* ------------------------------------------------- */
 
 /* -------------------- helpers -------------------- */
@@ -76,8 +75,8 @@ impl HLL {
     pub fn new(error: f64) -> HLL {
         assert!(error > 0.0 && error < 1.0);
         // error = 1.04 / sqrt(m)
-        let m = Float::floor((1.04/error) * (1.04/error)) as usize;
-        let b = Float::log2(m as f64) as u32;
+        let m = ((1.04/error) * (1.04/error)).floor() as usize;
+        let b = (m as f64).log2() as u32;
 
         HLL {
             alpha: alpha(m),
