@@ -29,14 +29,17 @@ let mut log = hll::HLL::new(0.01625);
 // you can insert anything that can be hashed
 log.insert(&"foo");
 log.insert(&"bar");
+log.insert(&1);
+log.insert(&2);
 
 // you can count the approximate number of elements
-println!("I think there are {} elements", log.count());
+println!("I think there are {} elements", log.count().round());
+// would print "I think there are 4 elements"
 
 // It implements Add so you can combine HLLs in a way the follows
 // the monoid laws.
 
 let first  = hll::HLL::new(0.26);
 let second = hll::HLL::new(0.26);
-let third  = first.clone() + second.clone();
+let third  = &first + &second;
 ```
