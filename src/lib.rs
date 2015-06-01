@@ -85,10 +85,12 @@ impl HLL {
     /// Create a new HLL with the desired standard error.
     /// Some examples might be:
     ///
+    ///```ignore
     ///     bits    size    error
     ///     12      4096    0.0163
     ///     13      8192    0.0115
     ///     14      16384   0.0081
+    ///```
     ///
     /// The error must be between 0.0 and 1.0. Beware using a stupidly
     /// small error size will grow beyond e.g. isize at less than 0.03
