@@ -1,4 +1,4 @@
-### hll
+### [hll](http://kjgorman.github.io/hll.rs/basichll/struct.HLL.html)
 
 ![](https://travis-ci.org/kjgorman/hll.rs.svg?branch=master)
 
@@ -11,6 +11,8 @@ is unlike the [current HLL
 crate](https://crates.io/crates/hyperloglog) on crates.io, which takes
 into account the bias correction (as outlined
 [here](http://stefanheule.com/papers/edbt2013-hyperloglog.pdf)).
+
+Rust doc: [here](http://kjgorman.github.io/hll.rs/basichll/struct.HLL.html)
 
 #### example
 
