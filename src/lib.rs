@@ -38,6 +38,14 @@ fn leftmost_one_bit (v: u64) -> usize {
 
 /* --------------- hyper log log ------------------- */
 
+/// The `HLL` struct stores the underlying registers
+/// of the HyperLogLog, with `m` many registers.
+///
+/// The value for `m` is derived from the desired error
+/// of the estimation. The error is considered to be
+/// 1.04 / sqrt(2 ^ bits). So, given a desired 1% error
+/// rate, we result in around 12 bits per register,
+/// producing an underlying M of 2^12 bits (i.e. 4kb).
 pub struct HLL {
     alpha: f64,
     b: u32,
@@ -68,10 +76,24 @@ pub struct HLL {
 }
 
 impl HLL {
+    /// Convenience function to produce a HLL with
+    /// one hundred and twenty eight registers.
     pub fn one_hundred_twenty_eight () -> HLL {
         HLL::new(0.09192)
     }
 
+    /// Create a new HLL with the desired standard error.
+    /// Some examples might be:
+    ///
+    ///     bits    size    error
+    ///     12      4096    0.0163
+    ///     13      8192    0.0115
+    ///     14      16384   0.0081
+    ///
+    /// The error must be between 0.0 and 1.0. Beware using a stupidly
+    /// small error size will grow beyond e.g. isize at less than 0.03
+    /// (if you need something that isn't an estimate probably don't use
+    /// a hyperloglog).
     pub fn new(error: f64) -> HLL {
         assert!(error > 0.0 && error < 1.0);
         // error = 1.04 / sqrt(m)
@@ -87,6 +109,8 @@ impl HLL {
         }
     }
 
+    /// Add an element into the hyperloglog estimate.
+    /// We require the type of value to be able to be hashed.
     pub fn insert<T: Hash>(&mut self, val: &T) {
         let mut hasher = SipHasher::new();
         val.hash(&mut hasher);
@@ -101,6 +125,8 @@ impl HLL {
         self.M[j] = cmp::max(self.M[j], rho);
     }
 
+    /// Return the estimated cardinality of the observed set
+    /// of elements.
     pub fn count(&self) -> f64 {
         self.range_correction(self.raw_estimate())
     }
@@ -137,10 +163,16 @@ impl HLL {
         -twoTo32 * (1.0 - e/twoTo32).ln()
     }
 
+    /// Access a copy of the underlying registers (this is mainly
+    /// here just for debugging/testing... its unlikely you'll need
+    /// this access typically).
     pub fn registers(&self) -> Vec<u8> {
         self.M.clone()
     }
 
+    /// Copies this instance into a new HLL.
+    /// Doesn't do anything tricky (i.e. this will entirely
+    /// re-allocate the underlying registers).
     pub fn clone (&self) -> HLL {
         HLL {
             alpha: self.alpha,
@@ -151,6 +183,8 @@ impl HLL {
         }
     }
 
+    /// A completely zeroed HLL. Not particularly useful
+    /// except as an identity element in `Add`.
     pub fn empty () -> HLL {
         HLL {
             alpha: 0.0,
@@ -179,6 +213,8 @@ impl std::fmt::Debug for HLL {
     }
 }
 
+/// A HLL is considered equal to another HLL when its
+/// configuration and registers are exactly identical.
 impl std::cmp::Eq for HLL {}
 impl std::cmp::PartialEq for HLL {
     fn eq(&self, other: &HLL) -> bool {
@@ -199,6 +235,8 @@ fn mergeRegisters (first: &Vec<u8>, second: &Vec<u8>) -> Vec<u8> {
     zipWith(|&l, &r| std::cmp::max(l, r), first.iter(), second.iter())
 }
 
+/// Adding together two HLLs produces a new HLL where
+/// the larger value of each register has been selected.
 impl<'a> std::ops::Add<&'a HLL> for &'a HLL {
     type Output = HLL;
 
