@@ -8,9 +8,11 @@ mod tests {
     fn a_hll_can_count_small_numbers () {
         let mut hll = HLL::new(0.0040625);
 
-        hll.insert(&1);
-        hll.insert(&2);
-        hll.insert(&3);
+        assert!(hll.insert(&1));
+        assert!(hll.insert(&2));
+        assert!(hll.insert(&3));
+        assert!(hll.insert(&1) == false);
+        assert!(hll.insert(&2) == false);
 
         assert_eq!(hll.count().round(), 3.0);
     }
@@ -19,10 +21,10 @@ mod tests {
     fn a_hll_can_count_heterogenuous_items () {
         let mut hll = HLL::new(0.0040625);
 
-        hll.insert(&1);
-        hll.insert(&"foo");
-        hll.insert(&2);
-        hll.insert(&"bar");
+        assert!(hll.insert(&1));
+        assert!(hll.insert(&"foo"));
+        assert!(hll.insert(&2));
+        assert!(hll.insert(&"bar"));
 
         assert_eq!(hll.count().round(), 4.0);
     }

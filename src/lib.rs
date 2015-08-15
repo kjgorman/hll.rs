@@ -113,7 +113,8 @@ impl HLL {
 
     /// Add an element into the hyperloglog estimate.
     /// We require the type of value to be able to be hashed.
-    pub fn insert<T: Hash>(&mut self, val: &T) {
+    /// Returns whether the insertion altered the hyperloglog
+    pub fn insert<T: Hash>(&mut self, val: &T) -> bool {
         let mut hasher = SipHasher::new();
         val.hash(&mut hasher);
         let hash = hasher.finish();
@@ -124,7 +125,10 @@ impl HLL {
         let w = hash & (2u64.pow(64 - self.b) - 1) as u64;
         let rho = leftmost_one_bit(w) as u8;
 
+        let prev = self.M[j];
         self.M[j] = cmp::max(self.M[j], rho);
+
+        prev != self.M[j]
     }
 
     /// Return the estimated cardinality of the observed set
