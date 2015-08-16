@@ -7,9 +7,9 @@ mod tests {
     #[test]
     fn serialize_deserialize_equal() {
         let first  = HLL::new(0.004);
-        let second = HLL::from_vec(first.clone().into_vec().unwrap()).unwrap();
+        let second = HLL::from_vec(first.clone().into_vec());
 
-        assert!(first == second);
+        assert_eq!(first, second);
     }
 
     #[test]
@@ -21,7 +21,7 @@ mod tests {
         first.insert(&"4");
         assert_eq!(first.count().round(), 4.0);
 
-        let second = HLL::from_vec(first.clone().into_vec().unwrap()).unwrap();
+        let second = HLL::from_vec(first.clone().into_vec());
         assert_eq!(second.count().round(), 4.0);
     }
 }

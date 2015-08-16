@@ -10,7 +10,7 @@ extern crate byteorder;
 use std::cmp;
 use std::fmt;
 use std::hash::{ Hash, Hasher, SipHasher };
-use std::io;
+use std::io::Cursor;
 use std::iter::{ repeat, Iterator };
 /* ------------------------------------------------- */
 
@@ -202,17 +202,17 @@ impl HLL {
         }
     }
 
-    pub fn into_vec(self) -> io::Result<Vec<u8>> {
+    pub fn into_vec(self) -> Vec<u8> {
         let mut data = self.M;
         data.reserve(21);
-        try!(data.write_f64::<BigEndian>(self.alpha));
-        try!(data.write_u32::<BigEndian>(self.b));
-        try!(data.write_u64::<BigEndian>(self.m as u64));
-        try!(data.write_u8(if self.isZero { 0 } else { 1 }));
-        Ok(data)
+        data.write_f64::<BigEndian>(self.alpha).unwrap();
+        data.write_u32::<BigEndian>(self.b).unwrap();
+        data.write_u64::<BigEndian>(self.m as u64).unwrap();
+        data.write_u8(if self.isZero { 0 } else { 1 }).unwrap();
+        data
     }
 
-    pub fn from_vec(data: Vec<u8>) -> io::Result<HLL> {
+    pub fn from_vec(data: Vec<u8>) -> HLL {
         assert!(data.len() >= 21);
         let mut M = data;
         // drain or split_off would be useful, but are not stable yet
@@ -220,18 +220,18 @@ impl HLL {
         for i in 0..21 {
             metadata[20 - i] = M.pop().unwrap();
         }
-        let mut readable = io::Cursor::new(metadata.to_vec());
+        let mut readable = Cursor::new(metadata.to_vec());
         let alpha = readable.read_f64::<BigEndian>().unwrap();
         let b = readable.read_u32::<BigEndian>().unwrap();
         let m = readable.read_u64::<BigEndian>().unwrap() as usize;
         let isZero = readable.read_u8().unwrap() == 0;
-        Ok(HLL {
+        HLL {
             M: M,
             alpha: alpha,
             b: b,
             m: m,
             isZero: isZero,
-        })
+        }
     }
 }
 
