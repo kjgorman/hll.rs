@@ -76,6 +76,8 @@ pub struct HLL {
     isZero: bool
 }
 
+impl std::cmp::Eq for HLL {}
+
 impl HLL {
     /// Convenience function to produce a HLL with
     /// one hundred and twenty eight registers.
