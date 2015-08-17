@@ -46,6 +46,7 @@ fn leftmost_one_bit (v: u64) -> usize {
 /// 1.04 / sqrt(2 ^ bits). So, given a desired 1% error
 /// rate, we result in around 12 bits per register,
 /// producing an underlying M of 2^12 bits (i.e. 4kb).
+#[derive(Clone, PartialEq)]
 pub struct HLL {
     alpha: f64,
     b: u32,
@@ -74,6 +75,8 @@ pub struct HLL {
     //     'instance').
     isZero: bool
 }
+
+impl std::cmp::Eq for HLL {}
 
 impl HLL {
     /// Convenience function to produce a HLL with
@@ -176,19 +179,6 @@ impl HLL {
         self.M.clone()
     }
 
-    /// Copies this instance into a new HLL.
-    /// Doesn't do anything tricky (i.e. this will entirely
-    /// re-allocate the underlying registers).
-    pub fn clone (&self) -> HLL {
-        HLL {
-            alpha: self.alpha,
-            b: self.b,
-            m: self.m,
-            M: self.M.clone(),
-            isZero: self.isZero
-        }
-    }
-
     /// A completely zeroed HLL. Not particularly useful
     /// except as an identity element in `Add`.
     pub fn empty () -> HLL {
@@ -216,19 +206,6 @@ impl std::fmt::Display for HLL {
 impl std::fmt::Debug for HLL {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         write!(formatter, "α: {}, b: {}, m: {}", self.alpha, self.b, self.m)
-    }
-}
-
-/// A HLL is considered equal to another HLL when its
-/// configuration and registers are exactly identical.
-impl std::cmp::Eq for HLL {}
-impl std::cmp::PartialEq for HLL {
-    fn eq(&self, other: &HLL) -> bool {
-           self.alpha  == other.alpha
-        && self.m      == other.m
-        && self.b      == other.b
-        && self.M      == other.M
-        && self.isZero == other.isZero
     }
 }
 
