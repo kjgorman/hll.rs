@@ -1,7 +1,7 @@
 [project]
 
 name        = "basichll"
-version     = "0.2.2"
+version     = "0.3.0"
 authors     = ["kjgorman <kieran@kjgorman.com>"]
 description = "The basic HyperLogLog algorithm"
 homepage    = "https://github.com/kjgorman/hll.rs"
