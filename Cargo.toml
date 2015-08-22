@@ -12,3 +12,6 @@ keywords    = ["hyperloglog", "hll"]
 [lib]
 name = "basichll"
 path = "src/lib.rs"
+
+[dependencies]
+byteorder = "0.3.11"
