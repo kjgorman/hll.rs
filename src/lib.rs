@@ -14,7 +14,7 @@ use std::io::Cursor;
 use std::iter::{ repeat, Iterator };
 /* ------------------------------------------------- */
 
-use byteorder::{BigEndian, WriteBytesExt, ReadBytesExt};
+use byteorder::{ BigEndian, WriteBytesExt, ReadBytesExt };
 
 /* -------------------- helpers -------------------- */
 
