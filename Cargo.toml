@@ -1,13 +1,14 @@
 [project]
 
-name        = "basichll"
-version     = "0.3.0"
-authors     = ["kjgorman <kieran@kjgorman.com>"]
-description = "The basic HyperLogLog algorithm"
-homepage    = "https://github.com/kjgorman/hll.rs"
-repository  = "https://github.com/kjgorman/hll.rs"
-license     = "MIT"
-keywords    = ["hyperloglog", "hll"]
+name          = "basichll"
+version       = "0.3.0"
+authors       = ["kjgorman <kieran@kjgorman.com>"]
+description   = "The basic HyperLogLog algorithm"
+homepage      = "https://github.com/kjgorman/hll.rs"
+documentation = "http://kjgorman.github.io/hll.rs/basichll/struct.HLL.html"
+repository    = "https://github.com/kjgorman/hll.rs"
+license       = "MIT"
+keywords      = ["hyperloglog", "hll"]
 
 [lib]
 name = "basichll"
