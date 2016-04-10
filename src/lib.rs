@@ -16,6 +16,10 @@ use std::iter::{ repeat, Iterator };
 
 use byteorder::{ BigEndian, WriteBytesExt, ReadBytesExt };
 
+/* -------------------- constants ------------------ */
+
+const METADATA_LENGTH: usize = 21;
+
 /* -------------------- helpers -------------------- */
 
 fn alpha (m: usize) -> f64 {
@@ -198,7 +202,7 @@ impl HLL {
 
     pub fn into_vec(self) -> Vec<u8> {
         let mut data = self.M;
-        data.reserve(21);
+        data.reserve(METADATA_LENGTH);
         data.write_f64::<BigEndian>(self.alpha).unwrap();
         data.write_u32::<BigEndian>(self.b).unwrap();
         data.write_u64::<BigEndian>(self.m as u64).unwrap();
@@ -207,14 +211,12 @@ impl HLL {
     }
 
     pub fn from_vec(data: Vec<u8>) -> HLL {
-        assert!(data.len() >= 21);
+        assert!(data.len() >= METADATA_LENGTH);
         let mut M = data;
-        // drain or split_off would be useful, but are not stable yet
-        let mut metadata = [0u8; 21];
-        for i in 0..21 {
-            metadata[20 - i] = M.pop().unwrap();
-        }
-        let mut readable = Cursor::new(metadata.to_vec());
+        let metadata_offset = M.len() - METADATA_LENGTH;
+        let metadata: Vec<u8> = M.drain(metadata_offset..).collect();
+
+        let mut readable = Cursor::new(metadata);
         let alpha = readable.read_f64::<BigEndian>().unwrap();
         let b = readable.read_u32::<BigEndian>().unwrap();
         let m = readable.read_u64::<BigEndian>().unwrap() as usize;
