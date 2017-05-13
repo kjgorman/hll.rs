@@ -8,8 +8,9 @@ extern crate byteorder;
 
 /* -------------------- std libs ------------------- */
 use std::cmp;
+use std::collections::hash_map::DefaultHasher;
 use std::fmt;
-use std::hash::{ Hash, Hasher, SipHasher };
+use std::hash::{ Hash, Hasher };
 use std::io::Cursor;
 use std::iter::{ repeat, Iterator };
 /* ------------------------------------------------- */
@@ -127,7 +128,7 @@ impl HLL {
     /// We require the type of value to be able to be hashed.
     /// Returns whether the insertion altered the hyperloglog
     pub fn insert<T: Hash>(&mut self, val: &T) -> bool {
-        let mut hasher = SipHasher::new();
+        let mut hasher = DefaultHasher::new();
         val.hash(&mut hasher);
         let hash = hasher.finish();
 
